@@ -16,10 +16,9 @@ Meteor.methods({
             userId: this.userId,
             role: "KeelaAdmin",
             email: currentUser.emails[0].address,
+            name: currentUser.emails[0].address,
           },
         ],
-        tags: [],
-        contacts: [],
         createdAt: new Date(),
       },
       function (error, result) {

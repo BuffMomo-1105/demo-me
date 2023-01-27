@@ -1,11 +1,11 @@
 <template>
   <nav class="navbar">
     <div class="navbar-brand">
-      <a href="#">My App</a>
+      <router-link to="/">My Dash</router-link>
     </div>
-    <div class="navbar-menu">
+    <div class="navbar-menu" v-if="$route.meta.requiresAuth">
       <ul>
-        <li @click="logout">Logout</li>
+        <li @click="logout" class="cursor-pointer">Logout</li>
       </ul>
     </div>
   </nav>
@@ -25,16 +25,17 @@ export default {
       ],
     };
   },
-  methods:{
-    logout(){
+  methods: {
+    logout() {
       Meteor.logout();
-    }
+      this.$router.push("/login");
+    },
   },
   computed: {
     username() {
-        return Meteor.user() ? Meteor.user().emails[0].address :'';
-    }
-}
+      return Meteor.user() ? Meteor.user().emails[0].address : "";
+    },
+  },
 };
 </script>
 

@@ -4,15 +4,20 @@
     :items="users"
     sort-by="calories"
     class="elevation-1 m-4"
-    style="left: 150px !important; position: absolute; width: 85%"
+    style="left: 150px !important; position: absolute; width: 85%; text-align: center !important;"
     data-app
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>My CRUD</v-toolbar-title>
+        <v-toolbar-title>Users</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
-        <v-dialog v-model="dialog" max-width="500px">
+        <!-- Add user -->
+        <v-dialog
+          v-model="dialog"
+          max-width="500px"
+          v-if="role == 'KeelaAdmin' || role == 'Admin'"
+        >
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
               Add User
@@ -70,6 +75,35 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+        <!-- Add user -->
+        <v-dialog v-model="editDialog" max-width="500px">
+          <v-card>
+            <v-card-title>
+              <span class="text-h5">Edit Role</span>
+            </v-card-title>
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="12" sm="6" md="6">
+                    <v-select
+                      v-model="editedItem.role"
+                      :items="['Admin', 'Coordinator']"
+                      :rules="[(v) => !!v || 'Role is required']"
+                      label="Role"
+                      required
+                    ></v-select>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
+              <v-btn color="blue darken-1" text @click="edit"> Save </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="text-h5"
@@ -90,11 +124,11 @@
       </v-toolbar>
     </template>
     <template v-slot:item.actions="{ item }">
-      <v-btn class="mr-2" @click="editItem(item)"> Edit </v-btn>
-      <v-btn class="mr-2" @click="deleteItem(item)"> Delete </v-btn>
-    </template>
-    <template v-slot:no-data>
-      <v-btn color="primary" @click="initialize"> Reset </v-btn>
+      <div v-if="role == 'KeelaAdmin' || role == 'Admin'">
+        <v-btn class="mr-2" @click="editItem(item)"> Edit </v-btn>
+        <v-btn class="mr-2" @click="deleteItem(item)"> Delete </v-btn>
+      </div>
+      <div v-else>-</div>
     </template>
   </v-data-table>
 </template>
@@ -103,6 +137,7 @@ import Organizations from "../../../api/collections/Organizations";
 export default {
   data: () => ({
     dialog: false,
+    editDialog: false,
     dialogDelete: false,
     headers: [
       { text: "Name", value: "name" },
@@ -111,7 +146,6 @@ export default {
       { text: "Role", value: "role" },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    desserts: [],
     editedIndex: -1,
     editedItem: {
       name: "",
@@ -141,132 +175,52 @@ export default {
       val || this.closeDelete();
     },
   },
-
-  created() {
-    this.initialize();
-  },
-
   methods: {
-    initialize() {
-      this.desserts = [
-        {
-          name: "Frozen Yogurt",
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-        },
-        {
-          name: "Ice cream sandwich",
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-        },
-        {
-          name: "Eclair",
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-        },
-        {
-          name: "Cupcake",
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-        },
-        {
-          name: "Gingerbread",
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-        },
-        {
-          name: "Jelly bean",
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-        },
-        {
-          name: "Lollipop",
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-        },
-        {
-          name: "Honeycomb",
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-        },
-        {
-          name: "Donut",
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-        },
-        {
-          name: "KitKat",
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-        },
-      ];
-    },
-
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
       this.editedItem = Object.assign({}, item);
-      this.dialog = true;
+      this.editDialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
       this.closeDelete();
     },
 
     close() {
       this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
+      this.editDialog=false;
+      this.editedItem=this.defaultItem;
     },
 
     closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
+      Meteor.call("deleteUser", {
+        userPermisson: this.role,
+        user: this.editedItem,
+        orgId: this.$route.params.org_id,
       });
+      this.dialogDelete = false;
     },
 
     save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
-      } else {
-        this.desserts.push(this.editedItem);
-        Meteor.call("addUser", {
-          userPermisson: this.role,
-          user: this.editedItem,
-          orgId: this.$route.params.org_id,
-        });
-      }
+      Meteor.call("addUser", {
+        userPermisson: this.role,
+        user: this.editedItem,
+        orgId: this.$route.params.org_id,
+      });
       this.close();
+
+    },
+    edit() {
+      Meteor.call("updateUser", {
+        userPermisson: this.role,
+        user: this.editedItem,
+        orgId: this.$route.params.org_id,
+      });
+      this.editDialog=false;
     },
   },
   meteor: {

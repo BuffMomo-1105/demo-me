@@ -30,6 +30,24 @@ const routes = [
       import(/* webpackChunkName: "home" */ "../components/users/Users.vue"),
   },
   {
+    path: "/organization/:org_id/contacts",
+    name: "Contacts",
+    meta: { requiresAuth: true },
+    component: () =>
+      import(
+        /* webpackChunkName: "home" */ "../components/contacts/Contacts.vue"
+      ),
+  },
+  {
+    path: "/organization/:org_id/tags",
+    name: "Tags",
+    meta: { requiresAuth: true },
+    component: () =>
+      import(
+        /* webpackChunkName: "home" */ "../components/tags/Tags.vue"
+      ),
+  },
+  {
     path: "/login",
     name: "Login",
     component: () =>

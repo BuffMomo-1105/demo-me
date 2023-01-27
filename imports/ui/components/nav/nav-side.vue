@@ -1,25 +1,26 @@
 <template>
-  <v-navigation-drawer v-model="drawer" absolute class="navi-bar">
-    <!-- <v-list-item>
-        <v-list-item-avatar>
-          <v-img src="https://randomuser.me/api/portraits/men/78.jpg"></v-img>
-        </v-list-item-avatar>
-  
-        <v-list-item-content>
-          <v-list-item-title>John Leider</v-list-item-title>
-        </v-list-item-content>
-      </v-list-item> -->
-
+  <v-navigation-drawer
+    v-model="drawer"
+    absolute
+    class="navi-bar"
+    hide-overlay
+    permanent
+  >
     <v-divider></v-divider>
 
     <v-list dense>
-      <v-list-item v-for="item in items" :key="item.title" link>
+      <span v-for="item in items" :key="item.title">
         <router-link :to="`/organization/${$route.params.org_id}/${item.link}`">
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
+          <v-list-item
+            link
+            :class="{ activeNav: $route.path.includes(item.link) }"
+          >
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </router-link>
-      </v-list-item>
+      </span>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -45,5 +46,8 @@ export default {
 .navi-bar {
   top: 56px !important;
   width: 150px !important;
+}
+.activeNav {
+  background: #d7d7d7;
 }
 </style>
